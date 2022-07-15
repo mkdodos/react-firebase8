@@ -29,7 +29,7 @@ function App() {
         </Menu.Item>
       </Menu>
       <Container>
-      <NewIncome/>
+      {/* <NewIncome/> */}
       <Incomes/>
      
       {/* <List>

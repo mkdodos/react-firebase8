@@ -10,13 +10,17 @@ function Incomes() {
   // ];
 
   const [incomes, setIncomes] = React.useState([]);
-  const [income, setIncome] = React.useState({});
+  // const [income, setIncome] = React.useState({});
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const [incomeDate, setIncomeDate] = React.useState('');
+  const [incomeDate, setIncomeDate] = React.useState(
+    new Date().toLocaleDateString()
+  );
   const [amt, setAmt] = React.useState('');
+
+  const [total, setTotal] = React.useState(0);
 
   const [note, setNote] = React.useState('');
   const [docID, setDocID] = React.useState('');
@@ -28,10 +32,19 @@ function Incomes() {
       .collection('incomes')
       .onSnapshot((snapshot) => {
         const data = snapshot.docs.map((doc) => {
+          
           return { ...doc.data(), id: doc.id };
         });
-        setIncomes(data);
-      });
+        let temp = 0;
+        data.forEach((income)=>{
+          temp +=  income.amt*1
+        })
+        setTotal(temp)
+        // console.log(init)
+        setIncomes(data);        
+      })
+
+     
     // .get()
     // .then((snapshot) => {
     //   const data = snapshot.docs.map((doc) => {
@@ -41,15 +54,7 @@ function Incomes() {
     // });
   }, []);
 
-  function addIncome() {
-    const db = firebase.firestore();
-    // 新增
-    db.collection('incomes').add({
-      date: new Date().toLocaleDateString(),
-      amt: amt,
-      note: note,
-    });
-  }
+  
 
   function deleteIncome() {
     setIsLoading(true);
@@ -61,6 +66,9 @@ function Incomes() {
         console.log('Document successfully deleted!');
         setIsModalOpen(false);
         setIsLoading(false);
+        setDocID('');
+        setAmt('');
+        setNote('');
       })
       .catch((error) => {
         console.error('Error removing document: ', error);
@@ -70,7 +78,6 @@ function Incomes() {
   function updateIncome() {
     setIsLoading(true);
     const db = firebase.firestore();
-   
 
     // 用 docID 判斷新增或更新
     if (docID) {
@@ -80,9 +87,9 @@ function Incomes() {
         .then(() => {
           setIsModalOpen(false);
           setIsLoading(false);
-          setDocID('')
-          setAmt('')
-          setNote('')
+          setDocID('');
+          setAmt('');
+          setNote('');
           console.log('Document successfully updated!');
         })
         .catch((error) => {
@@ -91,23 +98,23 @@ function Incomes() {
         });
     } else {
       // 新增
-      db.collection('incomes').add({
-        date: new Date().toLocaleDateString(),
-        amt: amt,
-        note: note,
-      }).then(()=>{
-        setIsModalOpen(false);
-        setIsLoading(false);
-        console.log('Document successfully created!');
-      })
+      db.collection('incomes')
+        .add({
+          date: incomeDate,
+          amt: amt,
+          note: note,
+        })
+        .then(() => {
+          setIsModalOpen(false);
+          setIsLoading(false);
+          console.log('Document successfully created!');
+        });
     }
   }
 
   return (
     <>
-      <Modal open={isModalOpen} closeIcon
-       onClose={() => setIsModalOpen(false)}
-      >
+      <Modal open={isModalOpen} closeIcon onClose={() => setIsModalOpen(false)}>
         <Modal.Header>Select a Photo</Modal.Header>
         <Modal.Content image>
           <Modal.Description>
@@ -142,29 +149,45 @@ function Incomes() {
         </Modal.Content>
 
         <Modal.Actions>
-        <Button color="red" floated="left" loading={isLoading} onClick={deleteIncome}>
-            刪除
-          </Button>
-         
-        
+          {docID ? (
+            <Button
+              color="red"
+              floated="left"
+              loading={isLoading}
+              onClick={deleteIncome}
+            >
+              刪除
+            </Button>
+          ) : (
+            ''
+          )}
 
           <Button color="blue" loading={isLoading} onClick={updateIncome}>
-            更新
+            儲存
           </Button>
         </Modal.Actions>
       </Modal>
 
+      {/* 用 submit 送出造成用量超額 */}
+      {/* <Button type='submit' onClick={addIncome}>Submit</Button> */}
+      <Button
+        color="blue"
+        onClick={() => {
+          setIsModalOpen(true);
+          setDocID('');
+          setAmt('');
+          setNote('');
+          setIncomeDate(new Date().toLocaleDateString())
+        }}
+      >
+        新增
+      </Button>
+      <Header>{total}</Header>
       
-        {/* 用 submit 送出造成用量超額 */}
-        {/* <Button type='submit' onClick={addIncome}>Submit</Button> */}
-        <Button color="blue" onClick={() => setIsModalOpen(true)}>
-          新增
-        </Button>
-        
       <Table unstackable>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell>日期{income.id}</Table.HeaderCell>
+            <Table.HeaderCell>日期</Table.HeaderCell>
             <Table.HeaderCell>收入</Table.HeaderCell>
             <Table.HeaderCell>備註</Table.HeaderCell>
           </Table.Row>

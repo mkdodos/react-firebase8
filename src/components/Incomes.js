@@ -15,7 +15,9 @@ function Incomes() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
+  const [incomeDate, setIncomeDate] = React.useState('');
   const [amt, setAmt] = React.useState('');
+
   const [note, setNote] = React.useState('');
   const [docID, setDocID] = React.useState('');
 
@@ -53,7 +55,7 @@ function Incomes() {
     setIsLoading(true);
     const db = firebase.firestore();
     db.collection('incomes')
-      .doc(income.id)
+      .doc(docID)
       .delete()
       .then(() => {
         console.log('Document successfully deleted!');
@@ -68,31 +70,58 @@ function Incomes() {
   function updateIncome() {
     setIsLoading(true);
     const db = firebase.firestore();
-    var washingtonRef = db.collection('incomes').doc(docID);
+   
 
-    // Set the "capital" field of the city 'DC'
-    return washingtonRef
-      .update({amt:amt,note:note})
-      .then(() => {
+    // 用 docID 判斷新增或更新
+    if (docID) {
+      var washingtonRef = db.collection('incomes').doc(docID);
+      washingtonRef
+        .update({ date: incomeDate, amt: amt, note: note })
+        .then(() => {
+          setIsModalOpen(false);
+          setIsLoading(false);
+          setDocID('')
+          setAmt('')
+          setNote('')
+          console.log('Document successfully updated!');
+        })
+        .catch((error) => {
+          // The document probably doesn't exist.
+          console.error('Error updating document: ', error);
+        });
+    } else {
+      // 新增
+      db.collection('incomes').add({
+        date: new Date().toLocaleDateString(),
+        amt: amt,
+        note: note,
+      }).then(()=>{
         setIsModalOpen(false);
         setIsLoading(false);
-        console.log('Document successfully updated!');
+        console.log('Document successfully created!');
       })
-      .catch((error) => {
-        // The document probably doesn't exist.
-        console.error('Error updating document: ', error);
-      });
+    }
   }
 
   return (
     <>
-      <Modal open={isModalOpen}>
+      <Modal open={isModalOpen} closeIcon
+       onClose={() => setIsModalOpen(false)}
+      >
         <Modal.Header>Select a Photo</Modal.Header>
         <Modal.Content image>
           <Modal.Description>
             <Header>編輯</Header>
           </Modal.Description>
           <Form>
+            <Form.Field>
+              <label>日期</label>
+              <input
+                value={incomeDate}
+                placeholder=""
+                onChange={(e) => setIncomeDate(e.target.value)}
+              />
+            </Form.Field>
             <Form.Field>
               <label>金額</label>
               <input
@@ -113,35 +142,25 @@ function Incomes() {
         </Modal.Content>
 
         <Modal.Actions>
-          <Button color="grey" onClick={() => setIsModalOpen(false)}>
-            取消
+        <Button color="red" floated="left" loading={isLoading} onClick={deleteIncome}>
+            刪除
           </Button>
+         
+        
 
           <Button color="blue" loading={isLoading} onClick={updateIncome}>
-            確定
+            更新
           </Button>
         </Modal.Actions>
       </Modal>
 
-      <Form onSubmit={addIncome}>
-        <Form.Field>
-          <label>金額</label>
-          <input
-            placeholder="First Name"
-            onChange={(e) => setAmt(e.target.value)}
-          />
-        </Form.Field>
-        <Form.Field>
-          <label>備註</label>
-          <input
-            placeholder="Last Name"
-            onChange={(e) => setNote(e.target.value)}
-          />
-        </Form.Field>
+      
         {/* 用 submit 送出造成用量超額 */}
         {/* <Button type='submit' onClick={addIncome}>Submit</Button> */}
-        <Form.Button>Submit</Form.Button>
-      </Form>
+        <Button color="blue" onClick={() => setIsModalOpen(true)}>
+          新增
+        </Button>
+        
       <Table unstackable>
         <Table.Header>
           <Table.Row>
@@ -156,10 +175,11 @@ function Incomes() {
             return (
               <Table.Row
                 onClick={() => {
+                  setIncomeDate(income.date);
                   setNote(income.note);
-                  setAmt(income.amt)
-                  setDocID(income.id)
-                
+                  setAmt(income.amt);
+                  setDocID(income.id);
+
                   setIsModalOpen(true);
                 }}
                 key={income.id}

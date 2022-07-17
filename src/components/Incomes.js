@@ -131,7 +131,7 @@ function Incomes() {
             </Form.Field>
             <Form.Field>
               <label>金額</label>
-              <input
+              <input type="number"
                 value={amt}
                 placeholder=""
                 onChange={(e) => setAmt(e.target.value)}

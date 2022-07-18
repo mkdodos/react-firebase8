@@ -89,6 +89,8 @@ function stocks() {
       // currPrices: firebase.firestore.FieldValue.arrayUnion(data),
       currPrices: firebase.firestore.FieldValue.arrayRemove(obj),
     });
+    const editedIndex = currPrices.indexOf(obj);
+    currPrices.splice(editedIndex,1)
   }
 
   // 更新現價

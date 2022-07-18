@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Button, Header, Table, Form, Modal } from 'semantic-ui-react';
 import firebase from '../utils/firebase';
-import 'firebase/firestore';
+// import 'firebase/firestore';
 
 function Incomes() {
   // const data = [

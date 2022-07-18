@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon, Button, Header, Table, Form, Modal } from 'semantic-ui-react';
+import { Container, Button, Header, Table, Form, Modal } from 'semantic-ui-react';
 import firebase from '../utils/firebase';
 import 'firebase/firestore';
 
@@ -30,6 +30,7 @@ function Incomes() {
     firebase
       .firestore()
       .collection('incomes')
+      .orderBy("date", "desc")
       .onSnapshot((snapshot) => {
         const data = snapshot.docs.map((doc) => {
           
@@ -39,19 +40,10 @@ function Incomes() {
         data.forEach((income)=>{
           temp +=  income.amt*1
         })
-        setTotal(temp)
-        // console.log(init)
+        setTotal(temp)       
         setIncomes(data);        
-      })
-
-     
-    // .get()
-    // .then((snapshot) => {
-    //   const data = snapshot.docs.map((doc) => {
-    //     return {...doc.data(), id:doc.id}
-    //   });
-    //   setIncomes(data);
-    // });
+      })     
+  
   }, []);
 
   
@@ -170,6 +162,12 @@ function Incomes() {
 
       {/* 用 submit 送出造成用量超額 */}
       {/* <Button type='submit' onClick={addIncome}>Submit</Button> */}
+  
+  
+      <Container>
+        
+       
+  
       <Button
         color="blue"
         onClick={() => {
@@ -213,18 +211,10 @@ function Incomes() {
               </Table.Row>
             );
           })}
-          {/* <Table.Row>
-          <Table.Cell>07-14</Table.Cell>
-          <Table.Cell>300</Table.Cell>
-          <Table.Cell>下雨</Table.Cell>
-        </Table.Row>
-        <Table.Row>
-          <Table.Cell>07-13</Table.Cell>
-          <Table.Cell>699</Table.Cell>
-          <Table.Cell></Table.Cell>
-        </Table.Row> */}
+         
         </Table.Body>
       </Table>
+      </Container>
     </>
   );
 }

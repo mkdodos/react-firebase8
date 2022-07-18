@@ -48,9 +48,18 @@ function stocks() {
       // .orderBy('date', 'desc')
       .onSnapshot((snapshot) => {
         const data = snapshot.docs.map((doc) => {
+          doc.data().currPrices = [{date:'2022-07-18',price:'123'}]
           return { ...doc.data(), id: doc.id };
         });
         setIncomes(data);
+        // console.log(data[0].currPrices)
+        // const tempdata = data[0].currPrices
+        // const result = tempdata.sort((a, b) => {
+        //   return a.date > b.date
+        //     ? 1
+        //     : -1;
+        // });
+        // console.log(result)
         let temp = 0;
         data.forEach((income) => {
           temp += income.qty * income.price;
@@ -60,6 +69,15 @@ function stocks() {
 
     // updateCurrPrices('89ru4gSP1QMShWfESBvP');
   }, []);
+  // 排序
+  function sortArray(arr) {
+     const result = arr.sort((a, b) => {
+          return a.date < b.date
+            ? 1
+            : -1;
+        });
+        return result
+  }
   // 更新現價
   function updateCurrPrices(id, obj) {
     const db = firebase.firestore();
@@ -315,7 +333,7 @@ function stocks() {
                   <List>
                     {/* {income.currPrices?<List.Item>{income.currPrices[0].price}</List.Item>:''} */}
                     {income.currPrices ? (
-                      <List.Item>{income.currPrices[income.currPrices.length-1]?.price}</List.Item>
+                      <List.Item>{sortArray(income.currPrices)[0]?.price}</List.Item>
                     ) : (
                       ''
                     )}

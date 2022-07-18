@@ -8,6 +8,9 @@ import {
   Form,
   Modal,
   List,
+  Input,
+  Label,
+  Icon,
 } from 'semantic-ui-react';
 // import {FieldValue} from 'firebase/firestore'
 
@@ -28,7 +31,9 @@ function stocks() {
 
   //
   // 文件欄位現價明細
-  const [currDate, setCurrDate] = React.useState('');
+  const [currDate, setCurrDate] = React.useState(
+    new Date().toISOString().slice(0, 10)
+  );
   const [currPrice, setCurrPrice] = React.useState('');
 
   // const [selectedItem, setSelectedItem]= React.useState({});
@@ -72,7 +77,7 @@ function stocks() {
   function insertCurrPrices() {
     // console.log(docID);
     // console.log(currDate);
-    
+
     const db = firebase.firestore();
     var colRef = db.collection(colName).doc(docID);
     const obj = { date: currDate, price: currPrice };
@@ -80,6 +85,7 @@ function stocks() {
     colRef.update({
       currPrices: firebase.firestore.FieldValue.arrayUnion(obj),
     });
+    setIsModalOpen(false);
   }
 
   function numFormat(total) {
@@ -199,13 +205,20 @@ function stocks() {
               </Button>
             </Form.Field>
             <Form.Field>
-              <input placeholder="date" 
-              onChange={(e) => setCurrDate(e.target.value)}
+              <Input
+                placeholder="date"
+                label="日期"
+                type="date"
+                value={currDate}
+                onChange={(e) => setCurrDate(e.target.value)}
               />
             </Form.Field>
             <Form.Field>
-              <input placeholder="price" 
-              onChange={(e) => setCurrPrice(e.target.value)}
+              <Input
+                type="number"
+                placeholder="price"
+                label="價格"
+                onChange={(e) => setCurrPrice(e.target.value)}
               />
             </Form.Field>
           </Form>
@@ -222,7 +235,7 @@ function stocks() {
                             price: obj.price,
                           })
                         }
-                        name="users"
+                        name="close"
                       />
                       <List.Content>
                         {obj.date}-{obj.price}
@@ -300,15 +313,22 @@ function stocks() {
                 </Table.Cell>
                 <Table.Cell>
                   <List>
-                    {income.currPrices
+                    {/* {income.currPrices?<List.Item>{income.currPrices[0].price}</List.Item>:''} */}
+                    {income.currPrices ? (
+                      <List.Item>{income.currPrices[income.currPrices.length-1]?.price}</List.Item>
+                    ) : (
+                      ''
+                    )}
+
+                    {/* {income.currPrices
                       ? income.currPrices.map((obj) => {
                           return (
                             <List.Item key={obj.date}>
-                              {obj.date}-{obj.price}
+                              {obj.date.slice(5,10)}-{obj.price}
                             </List.Item>
                           );
                         })
-                      : ''}
+                      : ''} */}
                     {/* <List.Item>
                       {income.currPrices
                         ? income.currPrices[0].date +

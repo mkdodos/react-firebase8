@@ -355,7 +355,7 @@ function stocks() {
                 </Table.Cell>
                 <Table.Cell>{income.price}</Table.Cell>
                 <Table.Cell textAlign="right">
-                  {numFormat(income.qty * income.price)}
+                  {numFormat(income.qty * (sortArray(income.currPrices)[0]?.price-income.price))}
                 </Table.Cell>
                
               </Table.Row>

@@ -40,6 +40,7 @@ function stocks() {
 
   // 合計
   const [total, setTotal] = React.useState(0);
+  const [totalCurr, setTotalCurr] = React.useState(0);
 
   React.useEffect(() => {
     firebase
@@ -47,24 +48,26 @@ function stocks() {
       .collection(colName)
       // .orderBy('date', 'desc')
       .onSnapshot((snapshot) => {
-        const data = snapshot.docs.map((doc) => {
-          doc.data().currPrices = [{ date: '2022-07-18', price: '123' }];
+        const data = snapshot.docs.map((doc) => {          
           return { ...doc.data(), id: doc.id };
         });
         setIncomes(data);
-        // console.log(data[0].currPrices)
-        // const tempdata = data[0].currPrices
-        // const result = tempdata.sort((a, b) => {
-        //   return a.date > b.date
-        //     ? 1
-        //     : -1;
-        // });
-        // console.log(result)
+        // 計算合計                
         let temp = 0;
         data.forEach((income) => {
           temp += income.qty * income.price;
+          if(income.currPrices)
+          console.log(sortArray(income.currPrices)[0]?.price)
         });
         setTotal(temp);
+        temp = 0;
+        data.forEach((income) => {
+          temp += income.qty * sortArray(income.currPrices)[0]?.price;          
+        });
+
+        setTotalCurr(temp);
+        // console.log(sortArray(data[0].currPrices)[0].price)
+        
       });
 
     // updateCurrPrices('89ru4gSP1QMShWfESBvP');
@@ -84,24 +87,23 @@ function stocks() {
     const editedIndex = currPrices.findIndex(fobj=>{
       return fobj.date === obj.date
     })
-
+    currPrices.splice(editedIndex,1)
     console.log(editedIndex); // 👉️ 1
-
+    colRef.update({      
+      currPrices: firebase.firestore.FieldValue.arrayRemove(obj),
+    });
    
     // firebase.firestore.FieldValue.arrayUnion("greater_virginia")
     // firebase.firestore.FieldValue.arrayRemove("east_coast")
     // const obj = { date: '0719', price: '456' };
     // const editedIndex = currPrices.indexOf(obj);
     // console.log(editedIndex)
-    colRef.update({
-      // currPrices: firebase.firestore.FieldValue.arrayUnion(data),
-      currPrices: firebase.firestore.FieldValue.arrayRemove(obj),
-    });
+    
     // console.log(obj.date)
     // console.log(currPrices)
     // console.log(obj)
 
-    currPrices.splice(editedIndex,1)
+    
   }
 
   // 更新現價
@@ -126,7 +128,7 @@ function stocks() {
       currency: 'USD',
     });
 
-    return formatter.format(total);
+    return formatter.format(Math.round(total));
     // 2,500
   }
 
@@ -309,15 +311,16 @@ function stocks() {
       >
         新增
       </Button>
-      <Header floated="right">{numFormat(total)}</Header>
+      <Header floated="right">{numFormat(totalCurr)} - {numFormat(total)} = {numFormat(totalCurr-total)} </Header>
       <Table unstackable>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell>名稱</Table.HeaderCell>
             <Table.HeaderCell>股數</Table.HeaderCell>
-            <Table.HeaderCell>價格</Table.HeaderCell>
-            <Table.HeaderCell textAlign="right">小計</Table.HeaderCell>
             <Table.HeaderCell>現價</Table.HeaderCell>
+            <Table.HeaderCell>成本</Table.HeaderCell>
+            <Table.HeaderCell textAlign="right">小計</Table.HeaderCell>
+           
           </Table.Row>
         </Table.Header>
 
@@ -338,10 +341,6 @@ function stocks() {
                 {/* <Table.Cell>{income.date.toDate().toLocaleDateString()}</Table.Cell> */}
                 <Table.Cell>{income.stockName}</Table.Cell>
                 <Table.Cell>{income.qty}</Table.Cell>
-                <Table.Cell>{income.price}</Table.Cell>
-                <Table.Cell textAlign="right">
-                  {numFormat(income.qty * income.price)}
-                </Table.Cell>
                 <Table.Cell>
                   <List>
                     {/* {income.currPrices?<List.Item>{income.currPrices[0].price}</List.Item>:''} */}
@@ -351,26 +350,14 @@ function stocks() {
                       </List.Item>
                     ) : (
                       ''
-                    )}
-
-                    {/* {income.currPrices
-                      ? income.currPrices.map((obj) => {
-                          return (
-                            <List.Item key={obj.date}>
-                              {obj.date.slice(5,10)}-{obj.price}
-                            </List.Item>
-                          );
-                        })
-                      : ''} */}
-                    {/* <List.Item>
-                      {income.currPrices
-                        ? income.currPrices[0].date +
-                          ' $' +
-                          income.currPrices[0].price
-                        : ''}
-                    </List.Item> */}
+                    )}                 
                   </List>
                 </Table.Cell>
+                <Table.Cell>{income.price}</Table.Cell>
+                <Table.Cell textAlign="right">
+                  {numFormat(income.qty * income.price)}
+                </Table.Cell>
+               
               </Table.Row>
             );
           })}

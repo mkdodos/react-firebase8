@@ -3,15 +3,9 @@ import { Container, Button, Header, Table, Form, Modal } from 'semantic-ui-react
 import firebase from '../utils/firebase';
 // import 'firebase/firestore';
 
-function Incomes() {
-  // const data = [
-  //   { date: 'dd', amt: 100, note: 'reain' },
-  //   { date: 'd45d', amt: 1500, note: 'rea45in' },
-  // ];
+function Incomes() { 
 
   const [incomes, setIncomes] = React.useState([]);
-  // const [income, setIncome] = React.useState({});
-
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -19,9 +13,7 @@ function Incomes() {
     new Date().toLocaleDateString()
   );
   const [amt, setAmt] = React.useState('');
-
   const [total, setTotal] = React.useState(0);
-
   const [note, setNote] = React.useState('');
   const [docID, setDocID] = React.useState('');
 

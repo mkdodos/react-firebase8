@@ -1,9 +1,23 @@
-import { useState } from 'react';
-import { BrowserRouter as Router, Route,Link, Switch } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import Incomes from './components/Incomes';
-import Stocks from './components/stocks';
-import { Menu, List, Container } from 'semantic-ui-react';
+import Stocks from './components/Stocks';
+import Accounts from './components/Accounts';
+import MySettings from './components/MySettings';
+import { Menu, List, Container, Dropdown } from 'semantic-ui-react';
+
+import firebase from './utils/firebase';
+import 'firebase/auth';
+import LoginForm from './components/LoginForm';
 function Header() {
+  const [user, setUser] = React.useState(null);
+  React.useEffect(() => {
+    firebase.auth().onAuthStateChanged((currUser) => {
+      setUser(currUser);
+      // currUser.updateProfile({displayName:'馬克'})
+    });
+    // console.log(user)
+  });
   const [activeItem, setActiveItem] = useState('');
   return (
     <Router>
@@ -25,9 +39,39 @@ function Header() {
         >
           股票
         </Menu.Item>
+
+        <Menu.Item
+          as={Link}
+          to="/accounts"
+          active={activeItem == 'accounts'}
+          onClick={() => setActiveItem('accounts')}
+        >
+          帳戶
+        </Menu.Item>
+        <Menu.Menu position="right">
+          {user ? (
+            // <Menu.Item onClick={() => firebase.auth().signOut()}>
+             
+              <Dropdown item text= {user.displayName}>
+                <Dropdown.Menu>
+                  <Dropdown.Item text="基本資料" as={Link} to='my-settings' />
+                  <Dropdown.Item text="登出" onClick={() => firebase.auth().signOut()} />
+                 
+                </Dropdown.Menu>
+              </Dropdown>
+            // </Menu.Item>
+          ) : (
+            <Menu.Item
+              as={Link}
+              to="/login-form"
+              active={activeItem == 'login-form'}
+              onClick={() => setActiveItem('login-form')}
+            >
+              登入表單
+            </Menu.Item>
+          )}
+        </Menu.Menu>
       </Menu>
-
-
 
       <Switch>
         <Route path="/incomes">
@@ -35,7 +79,16 @@ function Header() {
         </Route>
         <Route path="/stocks">
           <Stocks />
-        </Route>        
+        </Route>
+        <Route path="/accounts">
+          <Accounts />
+        </Route>
+        <Route path="/login-form">
+          <LoginForm />
+        </Route>
+        <Route path="/my-settings">
+          <MySettings />
+        </Route>
       </Switch>
     </Router>
   );

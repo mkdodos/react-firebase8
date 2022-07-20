@@ -1,5 +1,5 @@
 import React from 'react'
-import { Container, Form, Button } from 'semantic-ui-react';
+import { Container, Form, Button, Input } from 'semantic-ui-react';
 import firebase from '../utils/firebase';
 function LoginForm() {
   const [email, setEmail] = React.useState('mkdodos@gmail.com');
@@ -17,7 +17,7 @@ function LoginForm() {
       <Form onSubmit={login}>
         <Form.Field>
           <label>帳號</label>
-          <input  value={email}
+          <Input  value={email}
           onChange={e=>setEmail(e.target.value)}
           placeholder="請輸入帳號" />
         </Form.Field>

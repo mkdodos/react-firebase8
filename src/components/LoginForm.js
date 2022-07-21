@@ -1,13 +1,16 @@
 import React from 'react'
 import { Container, Form, Button, Input } from 'semantic-ui-react';
 import firebase from '../utils/firebase';
+import {useHistory} from 'react-router-dom'
 function LoginForm() {
+  const history = useHistory()
   const [email, setEmail] = React.useState('mkdodos@gmail.com');
   const [password, setPassword] = React.useState('123456')
   // const [user, setUser] = React.useState(null);
   function login() {
     firebase.auth().signInWithEmailAndPassword(email,password).then((user)=>{
       console.log(user)
+      history.push('/accounts')
       // setUser(currUser)
     })
     

@@ -56,8 +56,8 @@ function stocks() {
         let temp = 0;
         data.forEach((income) => {
           temp += income.qty * income.price;
-          if(income.currPrices)
-          console.log(sortArray(income.currPrices)[0]?.price)
+          // if(income.currPrices)
+          // console.log(sortArray(income.currPrices)[0]?.price)
         });
         setTotal(temp);
         temp = 0;
@@ -88,7 +88,7 @@ function stocks() {
       return fobj.date === obj.date
     })
     currPrices.splice(editedIndex,1)
-    console.log(editedIndex); // 👉️ 1
+    // console.log(editedIndex); // 👉️ 1
     colRef.update({      
       currPrices: firebase.firestore.FieldValue.arrayRemove(obj),
     });

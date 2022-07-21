@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Switch,
+  useHistory,
+} from 'react-router-dom';
 import Incomes from './components/Incomes';
 import Stocks from './components/Stocks';
 import Accounts from './components/Accounts';
@@ -9,7 +15,9 @@ import { Menu, List, Container, Dropdown } from 'semantic-ui-react';
 import firebase from './utils/firebase';
 import 'firebase/auth';
 import LoginForm from './components/LoginForm';
+
 function Header() {
+  
   const [user, setUser] = React.useState(null);
   React.useEffect(() => {
     firebase.auth().onAuthStateChanged((currUser) => {
@@ -18,6 +26,14 @@ function Header() {
     });
     // console.log(user)
   });
+  const history = useHistory();
+  function logout() {
+    
+    firebase.auth().signOut().then(()=>{
+      // history.push('/login-form');
+    });
+    
+  }
   const [activeItem, setActiveItem] = useState('');
   return (
     <Router>
@@ -51,16 +67,15 @@ function Header() {
         <Menu.Menu position="right">
           {user ? (
             // <Menu.Item onClick={() => firebase.auth().signOut()}>
-             
-              <Dropdown item text= {user.displayName}>
-                <Dropdown.Menu>
-                  <Dropdown.Item text="基本資料" as={Link} to='my-settings' />
-                  <Dropdown.Item text="登出" onClick={() => firebase.auth().signOut()} />
-                 
-                </Dropdown.Menu>
-              </Dropdown>
-            // </Menu.Item>
+
+            <Dropdown item text={user.displayName}>
+              <Dropdown.Menu>
+                <Dropdown.Item text="基本資料" as={Link} to="my-settings" />
+                <Dropdown.Item text="登出" onClick={logout} />
+              </Dropdown.Menu>
+            </Dropdown>
           ) : (
+            // </Menu.Item>
             <Menu.Item
               as={Link}
               to="/login-form"

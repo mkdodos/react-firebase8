@@ -8,8 +8,8 @@ import React from 'react';
 import Header from './Header';
 
 function App() {
-  const [activeItem, setActiveItem] = React.useState('');
-  React.useEffect(() => {});
+  // const [activeItem, setActiveItem] = React.useState('');
+  // React.useEffect(() => {});
 
   return (
     <>

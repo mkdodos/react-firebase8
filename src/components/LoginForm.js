@@ -9,7 +9,7 @@ function LoginForm() {
   // const [user, setUser] = React.useState(null);
   function login() {
     firebase.auth().signInWithEmailAndPassword(email,password).then((user)=>{
-      console.log(user)
+      // console.log(user)
       history.push('/accounts')
       // setUser(currUser)
     })

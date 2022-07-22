@@ -25,11 +25,12 @@ function Header() {
       // currUser.updateProfile({displayName:'馬克'})
     });
     // console.log(user)
-  });
+  },[]);
   const history = useHistory();
   function logout() {
     
     firebase.auth().signOut().then(()=>{
+      // Uncaught TypeError: Cannot read properties of undefined (reading 'push')
       // history.push('/login-form');
     });
     

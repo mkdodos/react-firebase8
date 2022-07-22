@@ -32,24 +32,24 @@ function Expenses() {
             return { ...doc.data(), id: doc.id };
           });
 
+          // 紀錄最後一份文件
+          lastVisible.current = snapshot.docs[snapshot.docs.length - 1];   
           setRows(data);
         });
     } else {
-      firebase
-        .firestore()
-        .collection('expenses')
-        .limit(20)
-        .orderBy('spend_date', 'desc')
-        .onSnapshot((snapshot) => {
-          const data = snapshot.docs.map((doc) => {
-            return { ...doc.data(), id: doc.id };
-          });
-          // 紀錄最後一份文件
-          lastVisible.current = snapshot.docs[snapshot.docs.length - 1];
-          // console.log(lastVisible.data())
-
-          setRows(data);
-        });
+      // firebase
+      //   .firestore()
+      //   .collection('expenses')
+      //   .limit(20)
+      //   .orderBy('spend_date', 'desc')
+      //   .onSnapshot((snapshot) => {
+      //     const data = snapshot.docs.map((doc) => {
+      //       return { ...doc.data(), id: doc.id };
+      //     });
+      //     // 紀錄最後一份文件
+      //     lastVisible.current = snapshot.docs[snapshot.docs.length - 1];  
+      //     setRows(data);
+      //   });
     }
   }, [currAcc]);
   return (

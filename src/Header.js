@@ -9,12 +9,14 @@ import {
 import Incomes from './components/Incomes';
 import Stocks from './components/Stocks';
 import Accounts from './components/Accounts';
+
 import MySettings from './components/MySettings';
 import { Menu, List, Container, Dropdown } from 'semantic-ui-react';
 
 import firebase from './utils/firebase';
 import 'firebase/auth';
 import LoginForm from './components/LoginForm';
+import AccExpenses from './components/AccExpenses';
 
 function Header() {
   
@@ -65,6 +67,17 @@ function Header() {
         >
           帳戶
         </Menu.Item>
+
+
+        <Menu.Item
+          as={Link}
+          to="/acc-expenses"
+          active={activeItem == 'acc-expenses'}
+          onClick={() => setActiveItem('acc-expenses')}
+        >
+          收支
+        </Menu.Item>
+
         <Menu.Menu position="right">
           {user ? (
             // <Menu.Item onClick={() => firebase.auth().signOut()}>
@@ -98,6 +111,9 @@ function Header() {
         </Route>
         <Route path="/accounts">
           <Accounts />
+        </Route>
+        <Route path="/acc-expenses">
+          <AccExpenses />
         </Route>
         <Route path="/login-form">
           <LoginForm />

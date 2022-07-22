@@ -1,99 +1,173 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Container, Table, Grid, List, Icon, Image } from 'semantic-ui-react';
+import {
+  Container,
+  Button,
+  Grid,
+  List,
+  Icon,
+  Image,
+  Modal,
+  Header,
+  Form,
+  Table,
+} from 'semantic-ui-react';
 import firebase from '../utils/firebase';
-import Expenses from './Expenses';
+// import Expenses from './AccExpenses';
 function Accounts() {
-  const location = useLocation();
-  const url = new URLSearchParams(location.search);
-  const currAcc = url.get('acc');
-  const user = firebase.auth().currentUser;
-  // 存放點選帳戶的值,再用此值和帳戶的值做比對,呈現三角圖示
-  const [accName, setAccName] = React.useState('');
   const [rows, setRows] = React.useState([]);
-  // const [user, setUser] = React.useState(null);
+  const [accName, setAccName] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+  const [docID, setDocID] = React.useState('');
+  const user = firebase.auth().currentUser;
   React.useEffect(() => {
-
-    // Warning: Can't perform a React state update on an unmounted component. This is a no-op, but it indicates a memory leak in your application. To fix, cancel all subscriptions and asynchronous tasks in a useEffect cleanup function.
-    // firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        firebase
-          .firestore()
-          .collection('accounts')
-          .where('user_id', '==', user.uid)
-          .onSnapshot((snapshot) => {
-            const data = snapshot.docs.map((doc) => {
-              return doc.data();
-            });
-            setRows(data);
+    if (user) {
+      firebase
+        .firestore()
+        .collection('accounts')
+        .where('user_id', '==', user.uid)
+        .onSnapshot((snapshot) => {
+          const data = snapshot.docs.map((doc) => {
+            return { ...doc.data(), id: doc.id };
           });
-      }
+          setRows(data);
+        });
+    }
     // });
-    // firebase
-    //   .firestore()
-    //   .collection('accounts')
-    //   .onSnapshot((snapshot) => {
-    //     const data = snapshot.docs.map((doc) => {
-    //       return doc.data();
-    //     });
-    //     setRows(data);
-    //   });
-
-    // if (user) {
-
-    // } else {
-
-    //   firebase
-    //     .firestore()
-    //     .collection('accounts')
-    //     .onSnapshot((snapshot) => {
-    //       const data = snapshot.docs.map((doc) => {
-    //         return doc.data();
-    //       });
-    //       setRows([]);
-    //     });
-    // }
   }, []);
+
+  // 新增帳戶
+  function createAcc() {
+    // console.log(accName)
+    setOpen(false);
+    setAccName('');
+    const row = {
+      name: accName,
+      user_id: user.uid,
+    };
+    firebase
+      .firestore()
+      .collection('accounts')
+      .add(row)
+      .then(() => {
+        console.log('create');
+      });
+  }
+
+  function updateAcc() {
+    const db = firebase.firestore();
+    var docRef = db.collection('accounts').doc(docID);
+    const row = {
+      name: accName,
+      user_id: user.uid,
+    };
+    docRef.update(row).then(() => {
+      setOpen(false);
+      setAccName('');
+      setDocID('');
+    });
+  }
+
+  function saveRow() {
+    if (docID) {
+      updateAcc();
+    } else {
+      createAcc();
+    }
+  }
+
+  function deleteRow() {
+    // setIsLoading(true);
+    const db = firebase.firestore();
+    db.collection('accounts')
+      .doc(docID)
+      .delete()
+      .then(() => {
+        console.log('Document successfully deleted!');
+        setOpen(false);
+        // setIsLoading(false);
+        setDocID('');
+        setAccName('');
+      })
+      .catch((error) => {
+        console.error('Error removing document: ', error);
+      });
+  }
 
   return (
     <Container>
-      <Grid columns={3} divided>
-        <Grid.Row>
-          <Grid.Column width={3}>
-            <List selection size="large">
-              {rows.map((row, i) => {
-                return (
-                  <List.Item
-                    active={currAcc == row.name}
-                    key={i}
-                    as={Link}
-                    to={`/accounts?acc=${row.name}`}
-                  >
-                    {currAcc == row.name ? <Icon name="right triangle" /> : ''}
-                    <List.Content onClick={(e) => setAccName(row.name)}>
-                      {row.name}
-                    </List.Content>
-                  </List.Item>
-                );
-              })}
-            </List>
-          </Grid.Column>
-          <Grid.Column width={10}>
-            <Expenses />
-          </Grid.Column>
-          <Grid.Column width={3}>
-            <Image src="https://react.semantic-ui.com/images/wireframe/media-paragraph.png" />
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
+      <Table unstackable>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>名稱</Table.HeaderCell>
+           
+          </Table.Row>
+        </Table.Header>
 
-      {/* <Dropdown text="帳戶">
-        <Dropdown.Menu>
+        <Table.Body>
           {rows.map((row, i) => {
-            return <Dropdown.Item key={i} text={row.name} />;
+            return (
+              <Table.Row
+                onClick={() => {
+                  setAccName(row.name);
+                  setDocID(row.id);
+                  setOpen(true);
+                }}
+                key={i}
+              >
+                <Table.Cell>{row.name}</Table.Cell>
+              </Table.Row>
+            );
           })}
-        </Dropdown.Menu>
-      </Dropdown> */}
+        </Table.Body>
+      </Table>
+
+      <Modal
+        closeIcon
+        onClose={() => setOpen(false)}
+        onOpen={() => {
+          setOpen(true);
+          setAccName('')
+        }}
+        open={open}
+        trigger={<Button>新增</Button>}
+      >
+        <Modal.Header>新增帳戶</Modal.Header>
+        <Modal.Content>
+          <Form>
+            <Form.Field>
+              <label>名稱</label>
+              <input
+                value={accName}
+                onChange={(e) => {
+                  setAccName(e.target.value);
+                }}
+                placeholder="First Name"
+              />
+            </Form.Field>
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          {docID ? (
+            <Button color="red" floated="left" onClick={deleteRow}>
+              刪除
+            </Button>
+          ) : (
+            ''
+          )}
+
+          <Button color="blue" onClick={saveRow}>
+            儲存
+          </Button>
+
+          {/* <Button color="red" onClick={() => setOpen(false)}>
+                  刪除
+                </Button>
+                <Button color="black" onClick={() => setOpen(false)}>
+                  新增
+                </Button> */}
+        </Modal.Actions>
+      </Modal>
     </Container>
   );
 }

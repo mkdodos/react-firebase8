@@ -19,6 +19,9 @@ function Expenses() {
   const lastVisible = React.useRef();
 
   const [rows, setRows] = React.useState([]);
+  const [docID, setDocID] = React.useState('');
+  const [note, setNote] = React.useState('');
+
   React.useEffect(() => {
     if (currAcc) {
       firebase
@@ -52,24 +55,65 @@ function Expenses() {
       //   });
     }
   }, [currAcc]);
+
+
+  // 新增
+  function createRow() {
+    const row = {
+      account_name:currAcc,
+      note:note,
+      spend_date:'2022-07-22'
+    }
+    firebase.firestore().collection('expenses').add(row).then(()=>{
+      setDocID('')
+      setNote('')
+    })    
+  }
+
+  function deleteRow() {
+    const db = firebase.firestore();
+    const docRef= db.collection('expenses').doc(docID);
+    docRef.delete().then(()=>{
+      setDocID('')
+      setNote('')
+    })
+  }
+
+
   return (
     <>
+    <Button onClick={createRow}>新增</Button>
+    {/* <Button onClick={deleteRow} color='red'>刪除</Button> */}
+    <Form>
+    <Form.Input value={note} onChange={(e)=>{setNote(e.target.value)}} />
+    </Form>
+    
       <Table unstackable>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell width={3}>日期</Table.HeaderCell>
             <Table.HeaderCell width={5}>項目</Table.HeaderCell>
             <Table.HeaderCell>金額</Table.HeaderCell>
+            {/* <Table.HeaderCell>id</Table.HeaderCell> */}
+            <Table.HeaderCell>btn</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
           {rows.map((row, i) => {
             return (
-              <Table.Row key={i}>
+              <Table.Row key={i} onClick={()=>{
+                setDocID(row.id)
+                setNote(row.note)
+                }}>
                 <Table.Cell>{row.spend_date}</Table.Cell>
                 <Table.Cell>{row.note}</Table.Cell>
                 <Table.Cell>{row.expense}</Table.Cell>
+                {/* <Table.Cell>{row.account_name}</Table.Cell> */}
+                <Table.Cell>
+                  {docID==row.id?<Button onClick={deleteRow} color='red'>刪除</Button>:''}
+                  
+                  </Table.Cell>
               </Table.Row>
             );
           })}

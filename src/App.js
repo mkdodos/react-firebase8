@@ -1,20 +1,24 @@
 import React from 'react';
-
-// import firebase from "./utils/firebase";
-// import "firebase/auth";
-// import Incomes from './components/Incomes';
-
-
+import Signup from './components/Signup';
 import Header from './Header';
-
+// import { Container, Row, Col } from 'react-bootstrap';
 function App() {
-  // const [activeItem, setActiveItem] = React.useState('');
-  // React.useEffect(() => {});
-
   return (
     <>
+
+
+
+
+
+      {/* <Container
+        className="d-flex align-items-center justfy-content-center"
+        style={{ minHeight: '100vh' }}
+      >
+        <div className="w-100" style={{ maxWidth: '400px' }}>         
+          <Signup />
+        </div>
+      </Container> */}
       <Header />
-      
     </>
   );
 }

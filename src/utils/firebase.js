@@ -1,4 +1,5 @@
 import firebase from 'firebase/app'
+import "firebase/auth"
 // const firebaseConfig = {
 //   apiKey: "AIzaSyCxMvi4M0Xai8kuqn3r970KLassk-fTlGw",
 //   authDomain: "social-cool-16812.firebaseapp.com",
@@ -18,8 +19,11 @@ const firebaseConfig = {
   measurementId: "G-012VKYDZ07"
 };
 
+
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+const app = firebase.initializeApp(firebaseConfig);
+export const auth = app.auth()
+
 export default firebase
 // Initialize Cloud Firestore and get a reference to the service
 // const db = firebase.firestore();

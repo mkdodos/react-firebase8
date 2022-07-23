@@ -17,6 +17,8 @@ import firebase from './utils/firebase';
 import 'firebase/auth';
 import LoginForm from './components/LoginForm';
 import AccExpenses from './components/AccExpenses';
+import Signup from './components/Signup';
+import Dashboard from './components/Dashboard';
 
 function Header() {
   
@@ -121,6 +123,9 @@ function Header() {
         <Route path="/my-settings">
           <MySettings />
         </Route>
+        <Route path="/signup" component={Signup}/>
+        <Route path="/" component={Dashboard}/>
+         
       </Switch>
     </Router>
   );

@@ -20,46 +20,71 @@ import AccExpenses from './components/AccExpenses';
 import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+
 function Header() {
-  
+  // const {  currentUser } = useAuth()
+
   const [user, setUser] = React.useState(null);
+  const [email, setEmail] = React.useState('');
   React.useEffect(() => {
     firebase.auth().onAuthStateChanged((currUser) => {
       setUser(currUser);
+      if (currUser) {
+        setEmail(currUser.email);
+      }
       // currUser.updateProfile({displayName:'馬克'})
     });
-    // console.log(user)
-  },[]);
+  }, []);
   const history = useHistory();
-  function logout() {
-    
-    firebase.auth().signOut().then(()=>{
-      // Uncaught TypeError: Cannot read properties of undefined (reading 'push')
+  async function handleLogoutH() {
+    try {
+      await firebase.auth().signOut();
+      // 在這做轉址動作會沒作用
       // history.push('/login-form');
-    });
-    
+      // 改為在下拉選單直接 as={Link} to="login-form"
+    } catch {
+      // setError("Failed to log out")
+    }
+
+    // firebase.auth().signOut().then(()=>{
+    // Uncaught TypeError: Cannot read properties of undefined (reading 'push')
+    // history.push('/login-form');
+    // });
   }
   const [activeItem, setActiveItem] = useState('');
   return (
     <Router>
       <Menu>
-        <Menu.Item
-          as={Link}
-          to="/incomes"
-          active={activeItem == 'editor'}
-          onClick={() => setActiveItem('editor')}
-        >
-          外送收入
-        </Menu.Item>
-
-        <Menu.Item
-          as={Link}
-          to="/stocks"
-          active={activeItem == 'review'}
-          onClick={() => setActiveItem('review')}
-        >
-          股票
-        </Menu.Item>
+       
+       
+        {user && email == 'mkdodos@gmail.com' ? (
+           <Menu.Item
+           as={Link}
+           to="/incomes"
+           active={activeItem == 'editor'}
+           onClick={() => setActiveItem('editor')}
+         >
+           外送收入 
+         </Menu.Item>
+        ) : (
+          ''
+        )}
+       
+       
+       
+        {user && email == 'mkdodos@gmail.com' ? (
+          <Menu.Item
+            as={Link}
+            to="/stocks"
+            active={activeItem == 'review'}
+            onClick={() => setActiveItem('review')}
+          >
+            股票
+          </Menu.Item>
+        ) : (
+          ''
+        )}
 
         <Menu.Item
           as={Link}
@@ -69,7 +94,6 @@ function Header() {
         >
           帳戶
         </Menu.Item>
-
 
         <Menu.Item
           as={Link}
@@ -82,12 +106,15 @@ function Header() {
 
         <Menu.Menu position="right">
           {user ? (
-            // <Menu.Item onClick={() => firebase.auth().signOut()}>
-
             <Dropdown item text={user.displayName}>
               <Dropdown.Menu>
                 <Dropdown.Item text="基本資料" as={Link} to="my-settings" />
-                <Dropdown.Item text="登出" onClick={logout} />
+                <Dropdown.Item
+                  text="登出"
+                  as={Link}
+                  to="login-form"
+                  onClick={handleLogoutH}
+                />
               </Dropdown.Menu>
             </Dropdown>
           ) : (
@@ -104,29 +131,30 @@ function Header() {
         </Menu.Menu>
       </Menu>
 
-      <Switch>
-        <Route path="/incomes">
-          <Incomes />
-        </Route>
-        <Route path="/stocks">
-          <Stocks />
-        </Route>
-        <Route path="/accounts">
-          <Accounts />
-        </Route>
-        <Route path="/acc-expenses">
-          <AccExpenses />
-        </Route>
-        <Route path="/login-form">
-          <LoginForm />
-        </Route>
-        <Route path="/my-settings">
-          <MySettings />
-        </Route>
-        <Route path="/signup" component={Signup}/>
-        <Route path="/" component={Dashboard}/>
-         
-      </Switch>
+      <AuthProvider>
+        <Switch>
+          <Route path="/incomes">
+            <Incomes />
+          </Route>
+          <Route path="/stocks">
+            <Stocks />
+          </Route>
+          <Route path="/accounts">
+            <Accounts />
+          </Route>
+          <Route path="/acc-expenses">
+            <AccExpenses />
+          </Route>
+          <Route path="/login-form">
+            <LoginForm />
+          </Route>
+          <Route path="/my-settings">
+            <MySettings />
+          </Route>
+          <Route path="/signup" component={Signup} />
+          <Route path="/" component={Dashboard} />
+        </Switch>
+      </AuthProvider>
     </Router>
   );
 }

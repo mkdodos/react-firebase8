@@ -23,7 +23,7 @@ function LoginForm() {
       .signInWithEmailAndPassword(email, password)
       .then((user) => {
         // console.log(user)
-        history.push('/dashboard');
+        history.push('/acc-expenses');
         // setUser(currUser)
       });
   }

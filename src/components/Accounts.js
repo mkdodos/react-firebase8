@@ -13,19 +13,26 @@ import {
   Table,
 } from 'semantic-ui-react';
 import firebase from '../utils/firebase';
+import { useAuth } from "../contexts/AuthContext"
 // import Expenses from './AccExpenses';
 function Accounts() {
   const [rows, setRows] = React.useState([]);
   const [accName, setAccName] = React.useState('');
   const [open, setOpen] = React.useState(false);
   const [docID, setDocID] = React.useState('');
-  const user = firebase.auth().currentUser;
+  const { currentUser } = useAuth()
+  // const user = firebase.auth().currentUser;
+ 
+ 
+ 
   React.useEffect(() => {
-    if (user) {
+   
+    
+    if (currentUser) {
       firebase
         .firestore()
         .collection('accounts')
-        .where('user_id', '==', user.uid)
+        .where('user_id', '==', currentUser.uid)
         .onSnapshot((snapshot) => {
           const data = snapshot.docs.map((doc) => {
             return { ...doc.data(), id: doc.id };
@@ -33,7 +40,8 @@ function Accounts() {
           setRows(data);
         });
     }
-    // });
+
+
   }, []);
 
   // 新增帳戶
@@ -43,7 +51,7 @@ function Accounts() {
     setAccName('');
     const row = {
       name: accName,
-      user_id: user.uid,
+      user_id: currentUser.uid,
     };
     firebase
       .firestore()
@@ -59,7 +67,7 @@ function Accounts() {
     var docRef = db.collection('accounts').doc(docID);
     const row = {
       name: accName,
-      user_id: user.uid,
+      // user_id: user.uid,
     };
     docRef.update(row).then(() => {
       setOpen(false);

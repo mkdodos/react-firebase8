@@ -42,21 +42,9 @@ function Expenses() {
           lastVisible.current = snapshot.docs[snapshot.docs.length - 1];
           setRows(data);
         });
-    } else {
-      // firebase
-      //   .firestore()
-      //   .collection('expenses')
-      //   .limit(20)
-      //   .orderBy('spend_date', 'desc')
-      //   .onSnapshot((snapshot) => {
-      //     const data = snapshot.docs.map((doc) => {
-      //       return { ...doc.data(), id: doc.id };
-      //     });
-      //     // 紀錄最後一份文件
-      //     lastVisible.current = snapshot.docs[snapshot.docs.length - 1];
-      //     setRows(data);
-      //   });
-    }
+    }else{
+      setRows([])
+    } 
   }, [currAcc]);
 
   // 新增
@@ -120,13 +108,17 @@ function Expenses() {
 
   return (
     <>
-      <Button
+    { 
+    
+    currAcc &&
+    <Button
         onClick={() => {
           setOpen(true);          
         }}
       >
         新增
       </Button>
+}
       {/* <Button onClick={deleteRow} color='red'>刪除</Button> */}
       <Modal open={open} closeIcon onClose={setDefault}>
         <Modal.Header>編輯支出</Modal.Header>

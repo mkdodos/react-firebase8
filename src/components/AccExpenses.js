@@ -46,19 +46,22 @@ function AccExpenses() {
     <Container>
       <Grid columns={3} divided>
         <Grid.Row>
-          <Grid.Column width={3}>
+          <Grid.Column width={4}>
             <List selection size="large">
               {rows.map((row, i) => {
                 return (
                   <List.Item
+                 
                     active={currAcc == row.name}
                     key={i}
                     as={Link}
                     to={`/acc-expenses?acc=${row.id}`}
                   >
-                    {currAcc == row.name ? <Icon name="right triangle" /> : ''}
+                    {currAcc == row.id ? <Icon name="right triangle" /> : ''}
                     <List.Content>
-                      {row.name}
+                    {/* <Icon name="right triangle" /> */}
+                     {row.name}
+                     
                     </List.Content>
                   </List.Item>
                 );
@@ -67,12 +70,10 @@ function AccExpenses() {
             
            
           </Grid.Column>
-          <Grid.Column width={10}>
+          <Grid.Column width={12}>
             <Expenses />
           </Grid.Column>
-          <Grid.Column width={3}>
-            <Image src="https://react.semantic-ui.com/images/wireframe/media-paragraph.png" />
-          </Grid.Column>
+        
         </Grid.Row>
       </Grid>
 

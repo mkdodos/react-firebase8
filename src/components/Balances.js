@@ -111,7 +111,7 @@ function Balances() {
   }
   return (
     <Container>
-      {currAcc}
+      
       <Grid columns="equal">
         {/* 帳戶 */}
         <Grid.Row>

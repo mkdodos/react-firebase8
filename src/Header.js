@@ -97,21 +97,21 @@ function Header() {
           帳戶
         </Menu.Item>
 
-        <Menu.Item
+        {/* <Menu.Item
           as={Link}
           to="/acc-expenses"
           active={activeItem == 'acc-expenses'}
           onClick={() => setActiveItem('acc-expenses')}
         >
           收支
-        </Menu.Item>
+        </Menu.Item> */}
 
 
         <Menu.Item
           as={Link}
           to="/balances"          
         >
-          收支2
+          收支
         </Menu.Item>
 
 

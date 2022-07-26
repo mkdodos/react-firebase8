@@ -29,7 +29,7 @@ function Balances() {
   const [open, setOpen] = useState(false);
   const user = auth.currentUser || null;
   const location = useLocation();
-  const history = useHistory();
+  const history = useHistory()
 
   const url = new URLSearchParams(location.search);
   const currAcc = url.get('account_id') || null;
@@ -39,6 +39,7 @@ function Balances() {
         .where('user_id', '==', user.uid)
         .limit(3)
         .get()
+
         .then((snapshot) => {
           const data = snapshot.docs.map((doc) => {
             return { ...doc.data(), id: doc.id };
@@ -48,16 +49,31 @@ function Balances() {
         });
     }
 
-    db.collection('balances')
-      .where('account_id', '==', currAcc)
-      // .orderBy('createdAt', 'desc')
-      .onSnapshot((snapshot) => {
-        const data = snapshot.docs.map((doc) => {
-          return { ...doc.data(), id: doc.id };
+    if (user && currAcc) {
+      db.collection('balances')
+        // .where('spend_date', '>=', '2022-07-01')
+        // .where('spend_date', '<=', '2022-07-31')
+        .where('account_id', '=', currAcc)
+        .orderBy('createdAt', 'desc')
+        // .get()
+
+        // .then((snapshot) => {
+
+        .onSnapshot((snapshot) => {
+          let expense = 0;
+          let income = 0;
+          const data = snapshot.docs.map((doc) => {
+            const row = doc.data();
+            // if (row.expense) expense += row.expense * 1;
+            // if (row.income) income += row.income * 1;
+            // setTotal({ income, expense });
+            return { ...doc.data(), id: doc.id };
+          });
+          setRows2(data);
+          // console.log(total);
         });
-        setRows2(data);
-      });
-  }, [currAcc]);
+    }
+  }, []);
   function saveRow() {
     if (docID) {
       const row = {
@@ -73,7 +89,7 @@ function Balances() {
           // rows2.unshift({ ...row, id: doc.id });
           // console.log(rows2);
           setOpen(false);
-          setDocID('');
+          setDocID('')
         });
     } else {
       const row = {
@@ -118,10 +134,10 @@ function Balances() {
           {rows.map((row, i) => {
             return (
               <Grid.Column key={i}>
-                <Segment 
+                <Segment
                   color="teal"
                   onClick={() => {
-                    history.push(`/balances?account_id=${row.id}`);
+                    history.push(`/balances?account_id=${row.id}`)
                     // setCurrAcc(row.id);
                     // 無法馬上取得 currAcc,要按第二下
                     // console.log(currAcc);

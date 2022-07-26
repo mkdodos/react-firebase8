@@ -54,6 +54,7 @@ function Expenses() {
       note: note,
       expense: amt,
       spend_date: '2022-07-22',
+      createdAt: firebase.firestore.Timestamp.now()
     };
     setIsLoading(true);
     firebase

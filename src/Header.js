@@ -5,6 +5,7 @@ import {
   Link,
   Switch,
   useHistory,
+  Redirect
 } from 'react-router-dom';
 import Incomes from './components/Incomes';
 import Stocks from './components/Stocks';
@@ -19,6 +20,7 @@ import LoginForm from './components/LoginForm';
 import AccExpenses from './components/AccExpenses';
 import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
+import Balances from './components/Balances';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -104,6 +106,15 @@ function Header() {
           收支
         </Menu.Item>
 
+
+        <Menu.Item
+          as={Link}
+          to="/balances"          
+        >
+          收支2
+        </Menu.Item>
+
+
         <Menu.Menu position="right">
           {user ? (
             <Dropdown item text={user.displayName}>
@@ -137,7 +148,8 @@ function Header() {
             <Incomes />
           </Route>
           <Route path="/stocks">
-            <Stocks />
+            {/* 要有登入才能查看此頁,沒有登入時導向登入頁 */}
+            {user ? <Stocks /> : <Redirect to="login-form"/> }
           </Route>
           <Route path="/accounts">
             <Accounts />
@@ -149,10 +161,12 @@ function Header() {
             <LoginForm />
           </Route>
           <Route path="/my-settings">
-            <MySettings />
+            <MySettings user={user} />
           </Route>
           <Route path="/signup" component={Signup} />
-          <Route path="/" component={Dashboard} />
+          <Route path="/balances" component={Balances} />
+          <Route path="/" exact component={Dashboard} />
+          
         </Switch>
       </AuthProvider>
     </Router>

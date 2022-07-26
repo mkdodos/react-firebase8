@@ -52,6 +52,7 @@ function Accounts() {
     const row = {
       name: accName,
       user_id: currentUser.uid,
+      createdAt: firebase.firestore.Timestamp.now()
     };
     firebase
       .firestore()
@@ -150,7 +151,7 @@ function Accounts() {
                 onChange={(e) => {
                   setAccName(e.target.value);
                 }}
-                placeholder="First Name"
+                placeholder="請輸入帳戶名稱"
               />
             </Form.Field>
           </Form>

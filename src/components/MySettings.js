@@ -1,8 +1,8 @@
 import { Button, Container, Header, Input, Form } from 'semantic-ui-react';
 import firebase from '../utils/firebase';
 import React from 'react';
-function MySettings() {
-  const user = firebase.auth().currentUser || {};
+function MySettings({user}) {
+  // const user = firebase.auth().currentUser || {};
   const [displayName, setDisplayName] = React.useState('');
   React.useEffect(() => {
     // setDisplayName(user.displayName)

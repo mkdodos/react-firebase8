@@ -13,7 +13,7 @@ import {
   Table,
 } from 'semantic-ui-react';
 import firebase from '../utils/firebase';
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from '../contexts/AuthContext';
 // import Expenses from './AccExpenses';
 function Accounts() {
   const [rows, setRows] = React.useState([]);
@@ -21,14 +21,11 @@ function Accounts() {
   const [balance, setBalance] = React.useState('');
   const [open, setOpen] = React.useState(false);
   const [docID, setDocID] = React.useState('');
-  const { currentUser } = useAuth()
+  const [isLoading, setIsLoading] = React.useState(false);
+  const { currentUser } = useAuth();
   // const user = firebase.auth().currentUser;
- 
- 
- 
+
   React.useEffect(() => {
-   
-    
     if (currentUser) {
       firebase
         .firestore()
@@ -41,8 +38,6 @@ function Accounts() {
           setRows(data);
         });
     }
-
-
   }, []);
 
   // 新增帳戶
@@ -53,7 +48,7 @@ function Accounts() {
     const row = {
       name: accName,
       user_id: currentUser.uid,
-      createdAt: firebase.firestore.Timestamp.now()
+      createdAt: firebase.firestore.Timestamp.now(),
     };
     firebase
       .firestore()
@@ -65,17 +60,19 @@ function Accounts() {
   }
 
   function updateAcc() {
+    setIsLoading(true);
     const db = firebase.firestore();
     var docRef = db.collection('accounts').doc(docID);
     const row = {
       name: accName,
-      balance
+      balance,
       // user_id: user.uid,
     };
     docRef.update(row).then(() => {
       setOpen(false);
       setAccName('');
       setDocID('');
+      setIsLoading(false);
     });
   }
 
@@ -88,7 +85,7 @@ function Accounts() {
   }
 
   function deleteRow() {
-    // setIsLoading(true);
+    setIsLoading(true);
     const db = firebase.firestore();
     db.collection('accounts')
       .doc(docID)
@@ -96,7 +93,7 @@ function Accounts() {
       .then(() => {
         console.log('Document successfully deleted!');
         setOpen(false);
-        // setIsLoading(false);
+        setIsLoading(false);
         setDocID('');
         setAccName('');
       })
@@ -112,7 +109,6 @@ function Accounts() {
           <Table.Row>
             <Table.HeaderCell>名稱</Table.HeaderCell>
             <Table.HeaderCell>餘額</Table.HeaderCell>
-           
           </Table.Row>
         </Table.Header>
 
@@ -121,6 +117,7 @@ function Accounts() {
             return (
               <Table.Row
                 onClick={() => {
+                  setBalance(row.balance);
                   setAccName(row.name);
                   setDocID(row.id);
                   setOpen(true);
@@ -140,7 +137,8 @@ function Accounts() {
         onClose={() => setOpen(false)}
         onOpen={() => {
           setOpen(true);
-          setAccName('')
+          // setBalance('')
+          // setAccName('')
         }}
         open={open}
         trigger={<Button>新增</Button>}
@@ -161,6 +159,7 @@ function Accounts() {
             <Form.Field>
               <label>餘額</label>
               <input
+                type="number"
                 value={balance}
                 onChange={(e) => {
                   setBalance(e.target.value);
@@ -172,14 +171,21 @@ function Accounts() {
         </Modal.Content>
         <Modal.Actions>
           {docID ? (
-            <Button color="red" floated="left" onClick={deleteRow}>
+            <Button
+              color="red"
+              loading={isLoading}
+              floated="left"
+              onClick={deleteRow}
+            >
               刪除
             </Button>
           ) : (
             ''
           )}
 
-          <Button color="blue" onClick={saveRow}>
+          <Button color="blue" 
+          loading={isLoading} 
+          onClick={saveRow}>
             儲存
           </Button>
 

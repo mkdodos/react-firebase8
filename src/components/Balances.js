@@ -21,6 +21,7 @@ function Balances() {
   const titleRef = useRef();
   const amtRef = useRef();
   const [amt, setAmt] = useState('');
+  const [title, setTitle] = useState('');
   const [oldAmt, setOldAmt] = useState('');
   const [row, setRow] = useState({});
   const [rows, setRows] = useState([]);
@@ -28,6 +29,7 @@ function Balances() {
   const [date, setDate] = useState(new Date().toLocaleDateString());
   const [rows2, setRows2] = useState([]);
   const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false)
   // 帳戶餘額
   const [balance, setBalance] = useState(0);
 
@@ -50,27 +52,29 @@ function Balances() {
             return { ...doc.data(), id: doc.id };
           });
           setRows(data);
-          if(currAcc){
-            const temp = data.filter(row=>row.id.includes(currAcc)) 
-            setBalance(temp[0].balance)
+          if (currAcc) {
+            const temp = data.filter((row) => row.id.includes(currAcc));
+            setBalance(temp[0].balance);
           }
-        
+
           // console.log(temp)
           // console.log(data.filter((row)=>{row.id==currAcc}));
         });
     }
 
-    // total
-    db.collection('balances').onSnapshot((snapshot) => {
-      const data = snapshot.docs.map((doc) => {
-        return { ...doc.data(), id: doc.id };
+    // total 本月支出
+    db.collection('balances')
+      .where('user_id', '==', user.uid)
+      .onSnapshot((snapshot) => {
+        const data = snapshot.docs.map((doc) => {
+          return { ...doc.data(), id: doc.id };
+        });
+        let temp = 0;
+        data.forEach((row) => {
+          temp += row.expense * 1;
+        });
+        setTotal(temp);
       });
-      let temp = 0;
-      data.forEach((row) => {
-        temp += row.expense * 1;
-      });
-      setTotal(temp);
-    });
 
     // 帳戶餘額
 
@@ -103,15 +107,18 @@ function Balances() {
       db.collection('balances')
         .doc(docID)
         .update(row)
-        .then((doc) => {         
+        .then((doc) => {
           setDefault();
           // 更新帳戶餘額
-          let temp =balance*1 + oldAmt*1 - amt*1 //支出減少
-          db.collection('accounts').doc(currAcc).update({
-            balance:temp
-          }).then(()=>{
-            setBalance(temp)
-          })
+          let temp = balance * 1 + oldAmt * 1 - amt * 1; //支出減少
+          db.collection('accounts')
+            .doc(currAcc)
+            .update({
+              balance: temp,
+            })
+            .then(() => {
+              setBalance(temp);
+            });
         });
     } else {
       const row = {
@@ -120,35 +127,44 @@ function Balances() {
         expense: amtRef.current.value,
         // income: amtRef.current.value,
         account_id: currAcc,
+        user_id: user.uid,
         createdAt: firebase.firestore.Timestamp.now(),
       };
       db.collection('balances')
         .add(row)
-        .then((doc) => {   
+        .then((doc) => {
           setDefault();
-           // 更新帳戶餘額
-           let temp =balance*1 - amt*1 //支出減少
-           db.collection('accounts').doc(currAcc).update({
-             balance:temp
-           }).then(()=>{
-             setBalance(temp)
-           })
+          // 更新帳戶餘額
+          let temp = balance * 1 - amt * 1; //支出減少
+          db.collection('accounts')
+            .doc(currAcc)
+            .update({
+              balance: temp,
+            })
+            .then(() => {
+              setBalance(temp);
+            });
         });
     }
   }
 
   function deleteRow() {
-    db.collection('balances').doc(docID).delete().then(()=>{
-      setDefault();
-      // 更新帳戶餘額
-      let temp =balance + amt*1 
-      db.collection('accounts').doc(currAcc).update({
-        balance:temp
-      }).then(()=>{
-        setBalance(temp)
-      })
-    });
-    
+    db.collection('balances')
+      .doc(docID)
+      .delete()
+      .then(() => {
+        setDefault();
+        // 更新帳戶餘額
+        let temp = balance * 1 + oldAmt * 1;
+        db.collection('accounts')
+          .doc(currAcc)
+          .update({
+            balance: temp,
+          })
+          .then(() => {
+            setBalance(temp);
+          });
+      });
   }
   // 這個函數給帳戶的 onClick,要按二次才能更新資料
   // setCurrAcc(row.id);  無法馬上取得 currAcc
@@ -226,17 +242,18 @@ function Balances() {
         </Grid.Row>
         <Grid.Row>
           <Grid.Column>
-            <Segment
-              color="blue"
-              onClick={() => {
-                setOpen(true);
-              }}
-              inverted
-              textAlign="center"
-            >
-              新增
-              {/* <Button fluid primary>新增</Button> */}
-            </Segment>
+            {currAcc && (
+              <Segment
+                color="blue"
+                onClick={() => {
+                  setOpen(true);
+                }}
+                inverted
+                textAlign="center"
+              >
+                新增
+              </Segment>
+            )}
           </Grid.Column>
         </Grid.Row>
       </Grid>
@@ -261,7 +278,11 @@ function Balances() {
             </Form.Field>
             <Form.Field>
               <label>項目</label>
-              <input ref={titleRef} />
+              <input
+                ref={titleRef}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </Form.Field>
             <Form.Field>
               <label>金額</label>
@@ -290,7 +311,7 @@ function Balances() {
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell>日期</Table.HeaderCell>
-            <Table.HeaderCell>收入</Table.HeaderCell>
+            <Table.HeaderCell>項目</Table.HeaderCell>
             <Table.HeaderCell>支出</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
@@ -302,15 +323,16 @@ function Balances() {
                 onClick={() => {
                   setOpen(true);
                   setRow(row);
+                  setTitle(row.title);
                   setAmt(row.expense);
                   setDocID(row.id);
                   // 記錄原金額
-                  setOldAmt(row.expense)
+                  setOldAmt(row.expense);
                 }}
                 key={row.id}
               >
                 <Table.Cell>{row.date}</Table.Cell>
-                <Table.Cell>{row.income}</Table.Cell>
+                <Table.Cell>{row.title}</Table.Cell>
                 <Table.Cell>{row.expense}</Table.Cell>
               </Table.Row>
             );

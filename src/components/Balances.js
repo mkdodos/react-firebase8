@@ -11,6 +11,7 @@ import {
   Form,
   Modal,
   Table,
+  Label,
 } from 'semantic-ui-react';
 import { Link, useLocation, useHistory } from 'react-router-dom';
 import firebase, { auth } from '../utils/firebase';
@@ -20,11 +21,16 @@ function Balances() {
   const titleRef = useRef();
   const amtRef = useRef();
   const [amt, setAmt] = useState('');
+  const [oldAmt, setOldAmt] = useState('');
   const [row, setRow] = useState({});
   const [rows, setRows] = useState([]);
   const [docID, setDocID] = useState('');
+  const [date, setDate] = useState(new Date().toLocaleDateString());
   const [rows2, setRows2] = useState([]);
-  const [total, setTotal] = useState({});
+  const [total, setTotal] = useState(0);
+  // 帳戶餘額
+  const [balance, setBalance] = useState(0);
+
   // const [currAcc, setCurrAcc] = useState();
   const [open, setOpen] = useState(false);
   const user = auth.currentUser || null;
@@ -44,9 +50,29 @@ function Balances() {
             return { ...doc.data(), id: doc.id };
           });
           setRows(data);
-          console.log(data);
+          if(currAcc){
+            const temp = data.filter(row=>row.id.includes(currAcc)) 
+            setBalance(temp[0].balance)
+          }
+        
+          // console.log(temp)
+          // console.log(data.filter((row)=>{row.id==currAcc}));
         });
     }
+
+    // total
+    db.collection('balances').onSnapshot((snapshot) => {
+      const data = snapshot.docs.map((doc) => {
+        return { ...doc.data(), id: doc.id };
+      });
+      let temp = 0;
+      data.forEach((row) => {
+        temp += row.expense * 1;
+      });
+      setTotal(temp);
+    });
+
+    // 帳戶餘額
 
     db.collection('balances')
       .where('account_id', '==', currAcc)
@@ -55,44 +81,74 @@ function Balances() {
         const data = snapshot.docs.map((doc) => {
           return { ...doc.data(), id: doc.id };
         });
+
         setRows2(data);
       });
   }, [currAcc]);
+
+  function setDefault() {
+    setOpen(false);
+    setDocID('');
+    setAmt('');
+  }
+
   function saveRow() {
     if (docID) {
       const row = {
         date: dateRef.current.value,
         title: titleRef.current.value,
-        income: amtRef.current.value,
+        expense: amtRef.current.value,
+        // income: amtRef.current.value,
       };
       db.collection('balances')
         .doc(docID)
         .update(row)
-        .then((doc) => {
-          // setRows2(...rows2,row);
-          // rows2.unshift({ ...row, id: doc.id });
-          // console.log(rows2);
-          setOpen(false);
-          setDocID('');
+        .then((doc) => {         
+          setDefault();
+          // 更新帳戶餘額
+          let temp =balance*1 + oldAmt*1 - amt*1 //支出減少
+          db.collection('accounts').doc(currAcc).update({
+            balance:temp
+          }).then(()=>{
+            setBalance(temp)
+          })
         });
     } else {
       const row = {
         date: dateRef.current.value,
         title: titleRef.current.value,
-        // expense:amtRef.current.value
-        income: amtRef.current.value,
+        expense: amtRef.current.value,
+        // income: amtRef.current.value,
         account_id: currAcc,
         createdAt: firebase.firestore.Timestamp.now(),
       };
       db.collection('balances')
         .add(row)
-        .then((doc) => {
-          // setRows2(...rows2,row);
-          // rows2.unshift({ ...row, id: doc.id });
-          console.log(rows2);
-          setOpen(false);
+        .then((doc) => {   
+          setDefault();
+           // 更新帳戶餘額
+           let temp =balance*1 - amt*1 //支出減少
+           db.collection('accounts').doc(currAcc).update({
+             balance:temp
+           }).then(()=>{
+             setBalance(temp)
+           })
         });
     }
+  }
+
+  function deleteRow() {
+    db.collection('balances').doc(docID).delete().then(()=>{
+      setDefault();
+      // 更新帳戶餘額
+      let temp =balance + amt*1 
+      db.collection('accounts').doc(currAcc).update({
+        balance:temp
+      }).then(()=>{
+        setBalance(temp)
+      })
+    });
+    
   }
   // 這個函數給帳戶的 onClick,要按二次才能更新資料
   // setCurrAcc(row.id);  無法馬上取得 currAcc
@@ -111,17 +167,17 @@ function Balances() {
   }
   return (
     <Container>
-      
       <Grid columns="equal">
         {/* 帳戶 */}
         <Grid.Row>
           {rows.map((row, i) => {
             return (
               <Grid.Column key={i}>
-                <Segment 
+                <Segment
                   color="teal"
                   onClick={() => {
                     history.push(`/balances?account_id=${row.id}`);
+                    setBalance(row.balance);
                     // setCurrAcc(row.id);
                     // 無法馬上取得 currAcc,要按第二下
                     // console.log(currAcc);
@@ -146,15 +202,25 @@ function Balances() {
             );
           })}
         </Grid.Row>
+        {/* 本月支出,帳戶餘額 */}
         <Grid.Row>
           <Grid.Column>
-            <Segment textAlign="right">
-              <Header>{total.income}</Header>
+            {/* <Label>
+              <Icon name="mail" /> 本月支出 {total}
+            </Label> */}
+            <Segment color="pink" textAlign="right">
+              <Header sub>本月支出</Header>
+              <span>${total}</span>
             </Segment>
           </Grid.Column>
           <Grid.Column>
-            <Segment textAlign="right">
-              <Header>{total.expense}</Header>
+            {/* <Label>
+              <Icon name="mail" /> 帳戶餘額 {total}
+            </Label> */}
+            <Segment color="teal" textAlign="right">
+              <Header sub>帳戶餘額</Header>
+              <span>${balance}</span>
+              {/* <Header>${balance}</Header> */}
             </Segment>
           </Grid.Column>
         </Grid.Row>
@@ -189,9 +255,8 @@ function Balances() {
               <label>日期</label>
               <input
                 ref={dateRef}
-                value={row.date}
-                onChange={(e) => setRow({ date: e.target.value })}
-                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
               />
             </Form.Field>
             <Form.Field>
@@ -210,7 +275,7 @@ function Balances() {
           </Form>
         </Modal.Content>
         <Modal.Actions>
-          <Button color="red" onClick={() => setOpen(false)}>
+          <Button color="red" floated="left" onClick={deleteRow}>
             <Icon name="remove" /> No
           </Button>
           <Button color="green" onClick={saveRow}>
@@ -237,8 +302,10 @@ function Balances() {
                 onClick={() => {
                   setOpen(true);
                   setRow(row);
-                  setAmt(row.income);
+                  setAmt(row.expense);
                   setDocID(row.id);
+                  // 記錄原金額
+                  setOldAmt(row.expense)
                 }}
                 key={row.id}
               >

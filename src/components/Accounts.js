@@ -18,6 +18,7 @@ import { useAuth } from "../contexts/AuthContext"
 function Accounts() {
   const [rows, setRows] = React.useState([]);
   const [accName, setAccName] = React.useState('');
+  const [balance, setBalance] = React.useState('');
   const [open, setOpen] = React.useState(false);
   const [docID, setDocID] = React.useState('');
   const { currentUser } = useAuth()
@@ -68,6 +69,7 @@ function Accounts() {
     var docRef = db.collection('accounts').doc(docID);
     const row = {
       name: accName,
+      balance
       // user_id: user.uid,
     };
     docRef.update(row).then(() => {
@@ -109,6 +111,7 @@ function Accounts() {
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell>名稱</Table.HeaderCell>
+            <Table.HeaderCell>餘額</Table.HeaderCell>
            
           </Table.Row>
         </Table.Header>
@@ -125,6 +128,7 @@ function Accounts() {
                 key={i}
               >
                 <Table.Cell>{row.name}</Table.Cell>
+                <Table.Cell>{row.balance}</Table.Cell>
               </Table.Row>
             );
           })}
@@ -152,6 +156,16 @@ function Accounts() {
                   setAccName(e.target.value);
                 }}
                 placeholder="請輸入帳戶名稱"
+              />
+            </Form.Field>
+            <Form.Field>
+              <label>餘額</label>
+              <input
+                value={balance}
+                onChange={(e) => {
+                  setBalance(e.target.value);
+                }}
+                placeholder="請輸入餘額"
               />
             </Form.Field>
           </Form>

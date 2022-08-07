@@ -14,7 +14,7 @@ import {
 } from 'semantic-ui-react';
 // import {FieldValue} from 'firebase/firestore'
 
-function stocks() {
+function Stocks() {
   // 文件集合名稱
   const colName = 'stocks';
   // 文件集合陣列
@@ -366,4 +366,4 @@ function stocks() {
     </Container>
   );
 }
-export default stocks;
+export default Stocks;

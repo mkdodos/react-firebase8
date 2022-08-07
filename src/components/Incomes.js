@@ -10,8 +10,13 @@ function Incomes() {
   const [isLoading, setIsLoading] = React.useState(false);
 
   const [incomeDate, setIncomeDate] = React.useState(
-    new Date().toLocaleDateString()
+    new Date().toISOString().slice(0,10)
   );
+
+  // const [incomeDate, setIncomeDate] = React.useState(
+  //   new Date().toLocaleDateString()
+  // );
+
   const [amt, setAmt] = React.useState('');
   const [total, setTotal] = React.useState(0);
   const [note, setNote] = React.useState('');
@@ -167,7 +172,7 @@ function Incomes() {
           setDocID('');
           setAmt('');
           setNote('');
-          setIncomeDate(new Date().toLocaleDateString())
+          setIncomeDate(new Date().toISOString().slice(0,10))
         }}
       >
         新增

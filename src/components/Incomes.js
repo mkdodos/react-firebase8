@@ -114,6 +114,7 @@ function Incomes() {
               <label>日期</label>
               <input
                 value={incomeDate}
+                type="date"
                 placeholder=""
                 onChange={(e) => setIncomeDate(e.target.value)}
               />

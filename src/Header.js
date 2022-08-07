@@ -23,6 +23,7 @@ import Dashboard from './components/Dashboard';
 import Balances from './components/Balances';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import incomesTotal from './components/IncomesTotal';
 
 function Header() {
   // const {  currentUser } = useAuth()
@@ -166,6 +167,7 @@ function Header() {
           <Route path="/signup" component={Signup} />
           <Route path="/balances" component={Balances} />
           <Route path="/" exact component={Dashboard} />
+          <Route path="/incomes-total"  component={incomesTotal} />
           
         </Switch>
       </AuthProvider>
